@@ -5,7 +5,7 @@ A classifier to classify the different categories of documents related to mortga
 Start the flask application by running the app.py and query the endpoints either using cURL or from the browser<br>
 
 API Endpoints<br>
-application/json - http://localhost:5000/docclassifer?words=<document content in text><br>
+application/json - http://localhost:5000/docclassifer?words=[document content in text]<br>
 text/html - http://localhost:5000/docclassifer and POST the content through the HTML form <br>
 
 An ensemble classification RandomForest is used to train the model. The trained model is saved and loaded in the api.<br>
