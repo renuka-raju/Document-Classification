@@ -1,9 +1,7 @@
 from flask import Flask, render_template, request, jsonify
-from action import classifier_action
+from action.classifier_action import Action
 application = Flask(__name__)
 app = application
-
-actionobj=classifier_action.classifier_action()
 
 @app.route('/docclassifier')
 def index():
@@ -12,7 +10,7 @@ def index():
 @app.route('/docjson', methods=['GET'])
 def get_class_json():
     text=request.args.get('words')
-    doc=actionobj.getlabelfrommodel(text)
+    doc=Action.getInstance().getlabelfrommodel(text)
     if(not doc):
         return "Unable to process this document"
     print("##################Returning category for input document as "+doc.get_label()+"####################")
@@ -21,13 +19,16 @@ def get_class_json():
 @app.route('/docclassifier', methods=['POST'])
 def get_class_html():
     text=request.form['documenttext']
-    doc=actionobj.getlabelfrommodel(text)
+    doc=Action.getInstance().getlabelfrommodel(text)
     if (not doc):
         return "Unable to process this document"
     print("##################Returning category for input document as "+doc.get_label()+"####################")
     return render_template("index.html",category=doc.get_label(), confidence=doc.get_confidence_scores())
 
-if __name__ == '__main__':
-    print('#############################Starting the Flask app on localhost#################################')
-    actionobj.getLabelMappings()
-    app.run(debug=False)
+print('#############################Starting the Flask app on localhost#################################')
+print("***********************************loaded model*************************************")
+Action.getInstance().load_model()
+Action.getInstance().load_vector()
+print("***********************************loaded TFIDF transformer*************************************")
+Action.getInstance().getLabelMappings()
+app.run()
