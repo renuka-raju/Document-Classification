@@ -25,10 +25,10 @@ def get_class_html():
     print("##################Returning category for input document as "+doc.get_label()+"####################")
     return render_template("index.html",category=doc.get_label(), confidence=doc.get_confidence_scores())
 
-print('#############################Starting the Flask app on localhost#################################')
+print('#############################Starting the Document Classiifer Flask app #################################')
 print("***********************************loaded model*************************************")
 Action.getInstance().load_model()
 Action.getInstance().load_vector()
 print("***********************************loaded TFIDF transformer*************************************")
 Action.getInstance().getLabelMappings()
-app.run()
+# app.run()
