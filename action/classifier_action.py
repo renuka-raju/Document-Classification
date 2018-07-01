@@ -53,41 +53,45 @@ class Action:
             print(e)
 
     def getlabelfrommodel(Action,text):
-        tfidf_transformer = TfidfTransformer()
-        loaded_vec = CountVectorizer(vocabulary=Action.tfidfvector)
-        test = pd.DataFrame()
-        test['doc'] = [text]
-        test_tfidf = tfidf_transformer.fit_transform(loaded_vec.transform(test['doc']))
-        print("***********************************transformed test input*************************************")
-        label = Action.loadedmodel.predict(test_tfidf)[0]
-        print("***********************************predicted output*************************************"+str(label))
-        print(Action.labelMap)
-        probabs = Action.loadedmodel.predict_proba(test_tfidf)
-        confidence_scores={}
-        for i, p in enumerate(probabs[0]):
-            if (p > 0):
-                confidence_scores[Action.labelMap[str(i)]]=p*100
-        print("***********************************predicted probabilities*************************************")
-        ordered_confidence=sorted(confidence_scores.items(),key=operator.itemgetter(1),reverse=True)
-        doc=document.document(Action.labelMap[str(label)],ordered_confidence)
-        print("Predicted category for the input document as:" + doc.predictedlabel)
-        return doc
-        # except Exception as e:
-        #     print('^^^^^^^^^^^^^^^^^^^^^^^^^^Failed to classify using the model^^^^^^^^^^^^^^^^^^^^^^^^^^^')
-        #     print(e)
+        try:
+            tfidf_transformer = TfidfTransformer()
+            loaded_vec = CountVectorizer(vocabulary=Action.tfidfvector)
+            test = pd.DataFrame()
+            test['doc'] = [text]
+            test_tfidf = tfidf_transformer.fit_transform(loaded_vec.transform(test['doc']))
+            print("***********************************transformed test input*************************************")
+            label = Action.loadedmodel.predict(test_tfidf)[0]
+            print("***********************************predicted output*************************************"+str(label))
+            print(Action.labelMap)
+            probabs = Action.loadedmodel.predict_proba(test_tfidf)
+            confidence_scores={}
+            for i, p in enumerate(probabs[0]):
+                if (p > 0):
+                    confidence_scores[Action.labelMap[str(i)]]=p*100
+            print("***********************************predicted probabilities*************************************")
+            ordered_confidence=sorted(confidence_scores.items(),key=operator.itemgetter(1),reverse=True)
+            doc=document.document(Action.labelMap[str(label)],ordered_confidence)
+            print("Predicted category for the input document as:" + doc.predictedlabel)
+            return doc
+        except Exception as e:
+            print('^^^^^^^^^^^^^^^^^^^^^^^^^^Failed to classify using the model^^^^^^^^^^^^^^^^^^^^^^^^^^^')
+            print(e)
 
     @staticmethod
     def getLabelMappings():
-        conn = S3Connection()
-        bucket = conn.get_bucket(Action.BUCKET_NAME)
-        key_obj = Key(bucket)
-        key_obj.key = Action.MAPPING_FILE_NAME
-        key_obj.get_contents_to_filename(Action.MAPPING_LOCAL_PATH)
-        mappingsfile=open(Action.MAPPING_LOCAL_PATH,'r')
-        lines=mappingsfile.readlines()
-        # print(lines)
-        for line in lines:
-            keyval=line.split(':')
-            Action.labelMap[keyval[0]]=keyval[1].strip()
-        print('############################Encoded label map for the categories is loaded##########################')
-
+        try:
+            conn = S3Connection()
+            bucket = conn.get_bucket(Action.BUCKET_NAME)
+            key_obj = Key(bucket)
+            key_obj.key = Action.MAPPING_FILE_NAME
+            key_obj.get_contents_to_filename(Action.MAPPING_LOCAL_PATH)
+            mappingsfile=open(Action.MAPPING_LOCAL_PATH,'r')
+            lines=mappingsfile.readlines()
+            # print(lines)
+            for line in lines:
+                keyval=line.split(':')
+                Action.labelMap[keyval[0]]=keyval[1].strip()
+            print('############################Encoded label map for the categories is loaded##########################')
+        except Exception as e:
+            print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Problem loading label encodings map file^^^^^^^^^^^^^^^^^^^^^^^")
+            print(e)
